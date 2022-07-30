@@ -3,10 +3,10 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const { startDatabase } = require("./database/initializer");
+const { insertBoardGame, getBoardGame } = require("./database/boardGames");
 
 const app = express();
-
-const boardGames = [{ title: "Dungeon Degenerates" }];
 
 app.use(helmet());
 
@@ -16,10 +16,14 @@ app.use(cors());
 
 app.use(morgan("combined"));
 
-app.get("/", (req, res) => {
-  res.send(boardGames);
+app.get("/", async (req, res) => {
+  res.send(await getBoardGame());
 });
 
-app.listen(3000, () => {
-  console.log("listening on port 3000");
+startDatabase().then(async () => {
+  await insertBoardGame({ title: "Kingdom Death Monster" });
+
+  app.listen(3000, async () => {
+    console.log("listening on port 3000");
+  });
 });
